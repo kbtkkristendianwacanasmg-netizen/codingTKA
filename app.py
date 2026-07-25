@@ -1,44 +1,61 @@
-from flask import Flask, render_template, request, jsonify
 import random
+import streamlit as st
+from PIL import Image
 
-app = Flask(__name__)
+# Konfigurasi Halaman Streamlit
+st.set_page_config(
+    page_title="Game Wajah Anak TK", page_icon="🎨", layout="centered"
+)
 
-# Daftar bagian wajah dan koordinat targetnya (misalnya, untuk wajah standar)
-# Anda perlu menyesuaikan koordinat ini dengan gambar wajah polos Anda.
-bagian_wajah = [
-    {'nama': 'mata_kiri', 'gambar': 'mata.png', 'target_x': 100, 'target_y': 150},
-    {'nama': 'mata_kanan', 'gambar': 'mata.png', 'target_x': 250, 'target_y': 150},
-    {'nama': 'hidung', 'gambar': 'hidung.png', 'target_x': 175, 'target_y': 200},
-    {'nama': 'mulut', 'gambar': 'mulut.png', 'target_x': 175, 'target_y': 250},
-    {'nama': 'telinga_kiri', 'gambar': 'telinga.png', 'target_x': 50, 'target_y': 175},
-    {'nama': 'telinga_kanan', 'gambar': 'telinga.png', 'target_x': 300, 'target_y': 175},
-]
+st.title("🧩 Pasang Bagian Wajah!")
+st.write("Pilih bagian wajah yang cocok di setiap posisi!")
 
-@app.route('/')
-def index():
-    # Acak urutan bagian wajah yang ditampilkan
-    bagian_wajah_acak = random.sample(bagian_wajah, len(bagian_wajah))
-    return render_template('index.html', bagian_wajah=bagian_wajah_acak)
+# State untuk menyimpan acakan kunci jawaban & skor
+if "game_started" not in st.session_state:
+    st.session_state.game_started = True
+    st.session_state.skor = 0
 
-@app.route('/cek_posisi', methods=['POST'])
-def cek_posisi():
-    data = request.get_json()
-    nama_bagian = data['nama']
-    x = data['x']
-    y = data['y']
+# Pilihan opsi untuk anak TK
+OPSI_MATA = ["👀 Mata Lengkap", "🕶️ Kacamata Hitam", "😉 Mata Merem Sebelah"]
+OPSI_HIDUNG = ["👃 Hidung Badut (Merah)", "👃 Hidung Biasa", "🐱 Hidung Kucing"]
+OPSI_MULUT = ["😀 Senyum Lebar", "👅 Melet Lucu", "😮 Kaget"]
 
-    # Cari data bagian wajah berdasarkan nama
-    bagian = next((b for b in bagian_wajah if b['nama'] == nama_bagian), None)
+# Tombol untuk Mengacak Tantangan Baru
+if st.button("🔄 Acak Game Baru"):
+    st.session_state.target_mata = random.choice(OPSI_MATA)
+    st.session_state.target_hidung = random.choice(OPSI_HIDUNG)
+    st.session_state.target_mulut = random.choice(OPSI_MULUT)
+    st.rerun()
 
-    if bagian:
-        # Cek apakah posisi drop cukup dekat dengan target (toleransi misalnya 20 piksel)
-        toleransi = 20
-        if abs(x - bagian['target_x']) <= toleransi and abs(y - bagian['target_y']) <= toleransi:
-            return jsonify({'status': 'benar', 'pesan': f'Hebat! {bagian["nama"].replace("_", " ").title()} di tempat yang benar!'})
-        else:
-            return jsonify({'status': 'salah', 'pesan': 'Coba lagi, ya!'})
+# Set kunci jawaban pertama kali
+if "target_mata" not in st.session_state:
+    st.session_state.target_mata = random.choice(OPSI_MATA)
+    st.session_state.target_hidung = random.choice(OPSI_HIDUNG)
+    st.session_state.target_mulut = random.choice(OPSI_MULUT)
+
+# Tampilkan Petunjuk Tantangan
+st.info(
+    f"🎯 **Tantangan Saat Ini:**\n"
+    f"- Mata: **{st.session_state.target_mata}**\n"
+    f"- Hidung: **{st.session_state.target_hidung}**\n"
+    f"- Mulut: **{st.session_state.target_mulut}**"
+)
+
+st.subheader("Bantu lengkapi wajahnya di bawah ini:")
+
+# Form Pilih Bagian Wajah (Interaktif untuk Anak-anak)
+pilihan_mata = st.selectbox("1. Pilih Mata:", OPSI_MATA)
+pilihan_hidung = st.selectbox("2. Pilih Hidung:", OPSI_HIDUNG)
+pilihan_mulut = st.selectbox("3. Pilih Mulut:", OPSI_MULUT)
+
+# Cek Hasil
+if st.button("🎉 Periksa Hasil!", type="primary"):
+    is_mata_benar = pilihan_mata == st.session_state.target_mata
+    is_hidung_benar = pilihan_hidung == st.session_state.target_hidung
+    is_mulut_benar = pilihan_mulut == st.session_state.target_mulut
+
+    if is_mata_benar and is_hidung_benar and is_mulut_benar:
+        st.balloons()  # Efek balon terbang!
+        st.success("🌟 HORE! KANIN HEBAT! Semua bagian wajah sudah benar! 🌟")
     else:
-        return jsonify({'status': 'error', 'pesan': 'Bagian wajah tidak ditemukan.'})
-
-if __name__ == '__main__':
-    app.run(debug=True)
+        st.error("OOPS! Masih ada yang belum cocok. Coba periksa lagi ya! 🧐")
