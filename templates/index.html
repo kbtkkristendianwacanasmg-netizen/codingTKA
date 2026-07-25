@@ -1,0 +1,115 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Bangun Wajah Anak-Anak</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        #game-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            margin-top: 20px;
+        }
+
+        #drop-zone {
+            width: 400px;
+            height: 500px;
+            background-color: white;
+            border: 4px dashed #3498db;
+            border-radius: 20px;
+            position: relative;
+            margin-right: 20px;
+        }
+
+        .face-outline {
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0.2; /* Subtle outline until items are placed */
+        }
+
+        .parts-container {
+            width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background-color: white;
+            padding: 15px;
+            border: 2px solid #3498db;
+            border-radius: 10px;
+        }
+
+        .draggable-part {
+            width: 60px; /* Base width */
+            height: auto;
+            cursor: move;
+            user-select: none;
+            touch-action: none; /* Crucial for mobile touch screens */
+        }
+
+        /* Specific feature adjustments if needed */
+        #eye { width: 40px; }
+        #nose { width: 30px; }
+        #mouth { width: 50px; }
+        #ear { width: 35px; }
+        #hair { width: 80px; }
+
+        #score-container {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Ayo Bangun Wajah!</h1>
+    
+    <div id="score-container">Skor: <span id="score">0</span></div>
+
+    <div id="game-container">
+        <!-- The area where parts are dropped -->
+        <div id="drop-zone">
+            <!-- Initial face outline (type defined by Python) -->
+            <div id="face-base" class="face-outline" style="background-image: url('{{ url_for('static', filename='images/face_outline_' + initial_face_type[0] + '.png') }}');"></div>
+        </div>
+
+        <!-- Container for draggable parts -->
+        <div class="parts-container">
+            <img src="{{ url_for('static', filename='images/eye.png') }}" class="draggable-part" id="eye" draggable="true" alt="Mata">
+            <img src="{{ url_for('static', filename='images/nose.png') }}" class="draggable-part" id="nose" draggable="true" alt="Hidung">
+            <img src="{{ url_for('static', filename='images/mouth.png') }}" class="draggable-part" id="mouth" draggable="true" alt="Mulut">
+            <img src="{{ url_for('static', filename='images/ear.png') }}" class="draggable-part" id="ear" draggable="true" alt="Telinga">
+            <img src="{{ url_for('static', filename='images/hair.png') }}" class="draggable-part" id="hair" draggable="true" alt="Rambut">
+        </div>
+    </div>
+
+    <button onclick="resetGame()">Main Lagi!</button>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
